@@ -1,0 +1,38 @@
+{
+  "images" : [
+    {
+      "filename" : "compresskaru_—Pngtree—soulmate text effect editable_6031679_1024x1024.jpeg",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "compresskaru_—Pngtree—soulmate text effect editable_6031679_1024x1024 1.jpeg",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "tinted"
+        }
+      ],
+      "filename" : "compresskaru_—Pngtree—soulmate text effect editable_6031679_1024x1024 2.jpeg",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
