@@ -1,9 +1,11 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct TinderDemoApp: App {
     @StateObject private var localNotificationManager = LocalNotificationManager()
     @StateObject private var authViewModel = AuthViewModel()
+    @StateObject private var appState = AppState.shared
     
     var body: some Scene {
         WindowGroup {
@@ -11,12 +13,20 @@ struct TinderDemoApp: App {
                 MainTabView()
                     .environmentObject(localNotificationManager)
                     .environmentObject(authViewModel)
+                    .environmentObject(appState)
+                    .onAppear {
+                        Task {
+                            await localNotificationManager.requestAuthorization()
+                        }
+                    }
             } else {
                 LoginView()
                     .environmentObject(localNotificationManager)
                     .environmentObject(authViewModel)
+                    .environmentObject(appState)
             }
         }
+        .modelContainer(for: ProfileImageModel.self)
     }
 }
 

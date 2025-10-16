@@ -1,7 +1,9 @@
 import SwiftUI
+import SwiftData
 
 struct UserProfileView: View {
     @Environment(\.dismiss) var dismiss
+    @Query var storedImages: [ProfileImageModel]
     @State private var currentImageIndex = 0
     let user: User
     
@@ -31,14 +33,14 @@ struct UserProfileView: View {
             
             ScrollView {
                 ZStack(alignment: .top) {
-                    Image(user.profileImageURLs[currentImageIndex])
+                    Image(uiImage: storedImages[currentImageIndex].uiImage!)
                         .resizable()
                         .scaledToFill()
                         .frame(width: SizeConstants.cardWidth, height: SizeConstants.cardHeight)
                         .overlay {
                             ImageScrollingOverlay(currentImageIndex: $currentImageIndex, imageCount: user.profileImageURLs.count)
                         }
-                    CardImageIndicatorView(currentImageIndex: currentImageIndex, imageCount: user.profileImageURLs.count)
+                    CardImageIndicatorView(currentImageIndex: currentImageIndex)
                 }
                 
                 VStack(alignment: .leading,spacing: 12) {

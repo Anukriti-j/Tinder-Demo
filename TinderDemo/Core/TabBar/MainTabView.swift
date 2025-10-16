@@ -1,16 +1,16 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @StateObject var appViewModel: AppViewModel = AppViewModel()
     @EnvironmentObject var localNotificationManager: LocalNotificationManager
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $appState.path) {
             TabView {
                 CardStackView()
                     .tabItem { Image(systemName: "flame") }
                     .tag(0)
-                SignUpView()
+                SearchView()
                     .tabItem { Image(systemName: "magnifyingglass") }
                     .tag(1)
                 Text("Inbox View")
@@ -21,16 +21,43 @@ struct MainTabView: View {
                     .tag(3)
             }
             .tint(.pink)
-            .navigationDestination(isPresented: $appViewModel.navigateToUserDetail) {
-                UserProfileView(user: MockData.users[1])
+            .navigationDestination(for: User.self) { user in
+                UserProfileView(user: user)
             }
         }
-        .onAppear {
-            localNotificationManager.appViewModel = appViewModel
+        .onReceive(NotificationCenter.default.publisher(for: .didTapNotification)) { value in
+            print("\(value)")
+            guard
+                let userInfo = value.userInfo,
+                let userID = userInfo["userID"] as? String
+            else {
+                print("inside guard nil info")
+                return }
+            
             Task {
-                await  localNotificationManager.requestAuthorization()
+                if let user = await fetchUser(by: userID) {
+                    await MainActor.run {
+                        appState.selectedUser = user
+                        appState.path.append(user)
+                        print("\(appState.path)")
+                        print("😉\(user)")
+                    }
+                }
             }
         }
+    }
+}
+
+private extension MainTabView {
+    func fetchUser(by id: String) async -> User? {
+        print("fetching user with id ")
+        for user in MockData.users {
+            if user.id == id {
+                print("\( user)❤️")
+                return user
+            }
+        }
+        return nil
     }
 }
 

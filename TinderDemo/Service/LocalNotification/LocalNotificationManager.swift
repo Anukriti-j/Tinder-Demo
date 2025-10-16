@@ -6,16 +6,11 @@ import SwiftUI
 class LocalNotificationManager: NSObject , ObservableObject, UNUserNotificationCenterDelegate {
     private let notificationCenter = UNUserNotificationCenter.current()
     @Published var isGrantedNotification: Bool = false
-    var appViewModel: AppViewModel?
-    private var appState: AppViewModel?
+    @Published var selectedUser: User? = nil
     var onNotificationTap: (([AnyHashable: Any]) -> Void)? // Callback
     
     override init() {
         super.init()
-    }
-    
-    func setAppState(_ state: AppViewModel) {
-        appState = state
         notificationCenter.delegate = self
     }
     
@@ -44,15 +39,16 @@ class LocalNotificationManager: NSObject , ObservableObject, UNUserNotificationC
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         return [.sound, .banner, .list]
     }
-    func scheduleBatchNotification(localNotification: LocalNotification) {
+    
+    func scheduleBatchNotification(user: User) {
         print("notification scheduled")
         let content = UNMutableNotificationContent()
-        content.title = localNotification.title
-        content.body = localNotification.body
-        content.userInfo = ["screen": "UserProfileView", "id": "123"]
+        content.title = "Liked ❤️: \(user.fullName)"
+        content.body = "Visit Profile"
+        content.userInfo = ["userID": user.id]
         content.sound = .default
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-        let request = UNNotificationRequest(identifier: localNotification.id, content: content, trigger: trigger) //localnotification.id to test
+        let request = UNNotificationRequest(identifier: user.id, content: content, trigger: trigger) //localnotification.id to test
         notificationCenter.add(request) { error in
             if let error = error {
                 print("Error scheduling notification: \(error.localizedDescription)")
@@ -60,13 +56,15 @@ class LocalNotificationManager: NSObject , ObservableObject, UNUserNotificationC
         }
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
         print("did receive response called")
-//        if response .notification.request.identifier == {
-//            DispatchQueue.main.async {
-//                self.appViewModel?.navigateToUserDetail = true
-//            }
-//        }
+        let userID = response.notification.request.content.userInfo["userID"] as? String
+
+        if let id = userID {
+            NotificationCenter.default.post(name: .didTapNotification, object: nil, userInfo: ["userID": id])
+        }
         completionHandler()
     }
 }

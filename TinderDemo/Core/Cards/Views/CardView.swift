@@ -1,9 +1,11 @@
 import SwiftUI
 import Foundation
 import NotificationCenter
+import SwiftData
 
 @MainActor
 struct CardView: View {
+    @Query var storedImages: [ProfileImageModel]
     @EnvironmentObject var localNotificationManager: LocalNotificationManager
     @ObservedObject var cardViewModel: CardViewModel
     
@@ -16,7 +18,7 @@ struct CardView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             ZStack(alignment: .top) {
-                Image(user.profileImageURLs[currentImageIndex])
+                Image(uiImage: storedImages[currentImageIndex].uiImage!)
                     .resizable()
                     .scaledToFill()
                     .frame(width: SizeConstants.cardWidth, height: SizeConstants.cardHeight)
@@ -24,7 +26,7 @@ struct CardView: View {
                     .overlay {
                         ImageScrollingOverlay(currentImageIndex: $currentImageIndex, imageCount: imageCount)
                     }
-                CardImageIndicatorView(currentImageIndex: currentImageIndex, imageCount: imageCount)
+                CardImageIndicatorView(currentImageIndex: currentImageIndex)
                 SwipeActionIndicatorView(xOffset: $xOffset)
             }
             UserInfoView(showProfileSheet: $showProfileSheet, user: user)
@@ -55,7 +57,7 @@ private extension CardView {
     }
     
     var imageCount: Int {
-        return user.profileImageURLs.count
+        return storedImages.count
     }
 }
 
@@ -73,12 +75,7 @@ private extension CardView {
             degrees = 12
         } completion: {
             cardViewModel.removeCard(model)
-            let localNotification = LocalNotification(
-                id: UUID().uuidString,
-                title: "Liked ❤️: \(user.fullName)",
-                body: "Visit Profile"
-            )
-            localNotificationManager.scheduleBatchNotification(localNotification: localNotification)
+            localNotificationManager.scheduleBatchNotification(user: user)
         }
     }
     
